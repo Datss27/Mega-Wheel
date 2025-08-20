@@ -169,8 +169,8 @@ async def handle_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
         rows = []
         rows.append("Angka   Status")
         rows.append("----------------")
-        for num in SEGMEN.keys():  # tampilkan semua angka
-            val = skor_angka.get(num, 0)
+        # Urutkan semua angka berdasarkan skor tertinggi
+        for num, val in sorted(skor_angka.items(), key=lambda x: x[1], reverse=True):
             prev_val = prev_skor_angka.get(num, 0)
             if val > prev_val:
                 tanda = "🔝"
