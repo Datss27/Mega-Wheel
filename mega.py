@@ -173,13 +173,16 @@ async def handle_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # === Reset histori ===
 async def reset_history(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    global prev_skor_angka
-    history_posisi.clear()
-    history_kelompok.clear()
-    transisi_kelompok_counter.clear()
-    prev_skor_angka.clear()
-    await update.message.reply_text("♻️ Histori sektor panas, transisi, kelompok & skor berhasil direset.")
+    global history_posisi, history_kelompok, transisi_kelompok_counter, prev_skor_angka
+    
+    history_posisi = []
+    history_kelompok = []
+    transisi_kelompok_counter = Counter()
+    prev_skor_angka = Counter()
 
+    await update.message.reply_text(
+        "♻️ Semua histori (sektor panas, transisi, kelompok, skor) berhasil direset."
+    )
 # === Main bot (Webhook) ===
 if __name__ == "__main__":
     PORT = int(os.environ.get("PORT", 8080))
