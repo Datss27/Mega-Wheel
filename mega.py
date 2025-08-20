@@ -109,7 +109,7 @@ async def handle_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # 1. Sektor panas
         for pos, freq in posisi_sorted[:3]:
             num = POSISI_RODA[pos]
-            skor_angka[num] += (5 * freq) / SEGMEN.get(num, 1)
+            skor_angka[num] += (7 * freq) / SEGMEN.get(num, 1)
 
         # 2. 5 angka panas
         angka_counter = Counter()
@@ -119,14 +119,14 @@ async def handle_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 angka_counter[POSISI_RODA[posisi_target]] += freq
         angka_filtered = [(num, freq) for num, freq in angka_counter.items()]
         for num, _ in sorted(angka_filtered, key=lambda x: x[1], reverse=True)[:5]:
-            skor_angka[num] += 3 / SEGMEN.get(num, 1)
+            skor_angka[num] += 4 / SEGMEN.get(num, 1)
 
         # 3. Kelompok paling sering muncul
         if history_kelompok:
             k_teratas, _ = Counter(history_kelompok).most_common(1)[0]
             for p in KELOMPOK_POSISI[k_teratas]:
                 num = POSISI_RODA[p]
-                skor_angka[num] += 2 / SEGMEN.get(num, 1)
+                skor_angka[num] += 3 / SEGMEN.get(num, 1)
 
         # 4. Prediksi kelompok berikutnya
         if kelompok_sekarang:
@@ -136,7 +136,7 @@ async def handle_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 for k in prediksi_kelompok:
                     for p in KELOMPOK_POSISI[k]:
                         num = POSISI_RODA[p]
-                        skor_angka[num] += 2 / SEGMEN.get(num, 1)
+                        skor_angka[num] += 3 / SEGMEN.get(num, 1)
 
         # 5. Transisi antar kelompok
         if kelompok_sekarang and history_kelompok:
@@ -145,7 +145,7 @@ async def handle_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
             if transisi_kelompok_counter[pasangan] > 1:
                 for p in KELOMPOK_POSISI[kelompok_sekarang]:
                     num = POSISI_RODA[p]
-                    skor_angka[num] += 3 / SEGMEN.get(num, 1)
+                    skor_angka[num] += 4 / SEGMEN.get(num, 1)
 
         # === Buat tabel skor ===
         rows = []
@@ -154,11 +154,11 @@ async def handle_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
         for num, val in sorted(skor_angka.items(), key=lambda x: x[1], reverse=True):
             prev_val = prev_skor_angka.get(num, 0)
             if val > prev_val:
-                tanda = "⬆️"
+                tanda = "🔝"
             elif val < prev_val:
                 tanda = "⬇️"
             else:
-                tanda = "➡️"
+                tanda = "🔜"
             rows.append(f"{str(num).ljust(6)} {tanda}")
             rows.append("----------------")
 
