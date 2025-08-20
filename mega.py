@@ -147,11 +147,30 @@ async def handle_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     num = POSISI_RODA[p]
                     skor_angka[num] += 4 / SEGMEN.get(num, 1)
 
-        # === Buat tabel skor ===
+        # 6. Hot vs Teori
+        total = len(history_posisi)
+        if total > 20:  # minimal 20 putaran baru dihitung
+            for num, seg in SEGMEN.items():
+                p_teori = seg / TOTAL_POSISI
+                p_aktual = sum(1 for pos in history_posisi if POSISI_RODA[pos] == num) / total
+                if p_aktual > p_teori:
+                    skor_angka[num] += 2 / SEGMEN[num]   # angka panas
+                elif p_aktual < p_teori * 0.5:
+                    skor_angka[num] += 1 / SEGMEN[num]   # angka dingin ekstrim → kemungkinan rebound
+
+        # 7. EWMA jangka pendek
+        lambda_ = 0.9
+        for i, pos in enumerate(reversed(history_posisi[-20:]), start=1):  # 20 putaran terakhir
+            num = POSISI_RODA[pos]
+            weight = (lambda_ ** i)
+            skor_angka[num] += weight / SEGMEN[num]
+
+        # === Buat tabel skor (hanya status semua angka) ===
         rows = []
         rows.append("Angka   Status")
         rows.append("----------------")
-        for num, val in sorted(skor_angka.items(), key=lambda x: x[1], reverse=True):
+        for num in SEGMEN.keys():  # tampilkan semua angka
+            val = skor_angka.get(num, 0)
             prev_val = prev_skor_angka.get(num, 0)
             if val > prev_val:
                 tanda = "🔝"
@@ -160,7 +179,7 @@ async def handle_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
             else:
                 tanda = "🔜"
             rows.append(f"{str(num).ljust(6)} {tanda}")
-            rows.append("----------------")
+        rows.append("----------------")
 
         tabel_skor = "\n".join(rows)
         teks += f"\n\n🏆 <b>Skor angka</b> :\n<pre>{tabel_skor}</pre>"
@@ -170,7 +189,6 @@ async def handle_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     except Exception as e:
         await update.message.reply_text(f"Error: {str(e)}", parse_mode="Markdown")
-
 # === Reset histori ===
 async def reset_history(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global history_posisi, history_kelompok, transisi_kelompok_counter, prev_skor_angka
